@@ -37,7 +37,7 @@
   "bugs": {
     "url": "https://github.com/gudbrant/RA16_diploma/issues"
   },
-  "homepage": "https://github.com/gudbrant/RA16_diploma",
+  "homepage": "https://gudbrant.github.io/RA16_diploma/",
   "browserslist": {
     "production": [
       ">0.2%",
