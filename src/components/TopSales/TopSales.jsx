@@ -1,37 +1,36 @@
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
+import CardList from '../CardList/CardList';
 import Preloader from '../Preloader/Preloader';
-import MessageDialog from '../MessageDialog/MessageDialog';
-import List from '../List/List';
-import { topSalesRequest } from '../../actions/topSalesAction';
+import { topSalesRequest } from '../../redux/topSales/actions';
 
-export default function TopSales() {
-  const topSalesState = useSelector((state) => state.topSalesReducer);
+export default function TopSales({ text }) {
+  const { items, loading, error } = useSelector((state) => state.topSales);
   const dispatch = useDispatch();
 
-  async function getTopSales() {
-    dispatch(topSalesRequest());
-  }
-
   useEffect(() => {
-    getTopSales();
+    dispatch(topSalesRequest());
+    return () => {};
   }, [dispatch]);
 
   return (
-    (topSalesState.topSalesData.length
-      || topSalesState.loadingStatus
-      || topSalesState.errorText) && (
-      <section className="top-sales">
-        <h2 className="text-center">Хиты продаж!</h2>
-        {topSalesState.loadingStatus && <Preloader />}
-        {topSalesState.errorText && (
-          <MessageDialog
-            content={{ type: 'error', text: topSalesState.errorText }}
-            onClick={() => getTopSales()}
-          />
-        )}
-        <List data={topSalesState.topSalesData} />
-      </section>
-    )
+    <>
+      { !error && (
+        <section className="top-sales">
+          { text && <h2 className="text-center">{text}</h2> }
+          { loading && <Preloader />}
+          { !loading && <CardList items={items} />}
+        </section>
+      )}
+    </>
   );
 }
+
+TopSales.defaultProps = {
+  text: 'Хиты продаж!',
+};
+
+TopSales.propTypes = {
+  text: PropTypes.string,
+};

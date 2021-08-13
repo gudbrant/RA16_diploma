@@ -1,34 +1,58 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import { useSelector, useDispatch } from 'react-redux';
-import { activeCategory } from '../../actions/categoriesAction';
+import { categoryChangeSelection, categoryRequest } from '../../redux/categories/actions';
 
 export default function Categories(props) {
-  const { onChange } = props;
-  const categoriesState = useSelector((state) => state.categoriesReducer);
+  const categories = useSelector((state) => state.categories);
   const dispatch = useDispatch();
 
-  const onCategoryChange = (event, id) => {
-    event.preventDefault();
-    dispatch(activeCategory(id));
-    onChange(id);
+  useEffect(() => {
+    dispatch(categoryRequest());
+    return () => {};
+  }, [dispatch]);
+
+  const selectedCount = categories.filter((o) => o.selected).length;
+
+  const changeSelectionToAll = (value) => {
+    categories.forEach((o) => {
+      dispatch(categoryChangeSelection({ id: o.id, selected: value }));
+    });
+  };
+
+  const handleClick = (evt, item) => {
+    if (evt) evt.preventDefault();
+    if (!item) {
+      changeSelectionToAll(false);
+      props.onClick();
+      return;
+    }
+    const { id, selected } = item;
+    changeSelectionToAll(false);
+    dispatch(categoryChangeSelection({ id, selected: !selected }));
+    props.onClick(!selected ? id : null);
   };
 
   return (
     <ul className="catalog-categories nav justify-content-center">
-      {categoriesState.categoriesData.map((value) => (
-        <li className="nav-item" key={value.id}>
+      <li className="nav-item">
+        <a
+          href="#"
+          className={`nav-link ${!selectedCount ? ' active' : ''}`}
+          onClick={(evt) => handleClick(evt)}
+        >
+          Все
+        </a>
+      </li>
+      {categories.map((o) => (
+        <li className="nav-item" key={o.id}>
           <a
-            className={cn({
-              'nav-link': true,
-              active: value.id === categoriesState.activeCategory,
-            })}
-            href=""
-            onClick={(event) => onCategoryChange(event, value.id)}
+            href="#"
+            className={`nav-link ${o.selected ? ' active' : ''}`}
+            onClick={(evt) => handleClick(evt, o)}
           >
-            {value.title}
+            {o.title}
           </a>
         </li>
       ))}
@@ -36,6 +60,10 @@ export default function Categories(props) {
   );
 }
 
+Categories.defaultProps = {
+  onClick: () => {},
+};
+
 Categories.propTypes = {
-  onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
 };

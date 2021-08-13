@@ -1,83 +1,76 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import Preloader from '../Preloader/Preloader';
-import MessageDialog from '../MessageDialog/MessageDialog';
+import { useSelector, useDispatch } from 'react-redux';
+import CardList from '../CardList/CardList';
 import Categories from '../Categories/Categories';
-import SearchForm from '../SearchForm/SearchForm';
-import List from '../List/List';
-import { catalogRequest } from '../../actions/catalogAction';
-import { catalogAndCategoriesRequest } from '../../actions/categoriesAction';
-import { searchTextStatus } from '../../actions/searchAction';
+import Preloader from '../Preloader/Preloader';
+import { catalogRequest } from '../../redux/catalog/actions';
+import { changeGlobalSetting } from '../../redux/globalSettings/actions';
 
-export default function Catalog(props) {
-  const { searchSupport } = props;
-  const categoriesState = useSelector((state) => state.categoriesReducer);
-  const catalogState = useSelector((state) => state.catalogReducer);
-  const searchState = useSelector((state) => state.searchReducer);
-  const searchText = searchSupport ? searchState.search : '';
+export default function Catalog({ text, showSearchField }) {
+  const {
+    items,
+    loading,
+    error,
+    recieveOffset,
+    recievedCount,
+  } = useSelector((state) => state.catalog);
+  const categories = useSelector((state) => state.categories);
+  const { searchString } = useSelector((state) => state.globalSettings);
+
   const dispatch = useDispatch();
 
-  async function getCatalog(categoryId, offset = 0) {
-    dispatch(catalogRequest(searchText, categoryId, offset));
-  }
-
-  async function getCatalogAndCategories(categoryId, offset = 0) {
-    dispatch(catalogAndCategoriesRequest(searchText, categoryId, offset));
-  }
-
   useEffect(() => {
-    getCatalogAndCategories(categoriesState.activeCategory);
-  }, [dispatch]);
+    dispatch(catalogRequest({
+      q: searchString.trim(),
+    }));
+    return () => {};
+  }, []);
 
-  useEffect(() => {
-    if (searchState.searchStatus) {
-      getCatalog(categoriesState.activeCategory);
-      dispatch(searchTextStatus(searchState.search, false));
-    }
-  }, [searchState.searchStatus]);
+  const handleClick = (categoryId) => {
+    dispatch(catalogRequest({
+      categoryId,
+      q: searchString.trim(),
+    }));
+  };
 
-  const onCategoryChange = (id) => getCatalog(id);
+  const handleLoadMore = () => {
+    const category = categories.find((o) => o.selected);
+    dispatch(catalogRequest({
+      categoryId: category ? category.id : null,
+      offset: items.length,
+      q: searchString.trim(),
+    }));
+  };
 
-  const loadData = (event) => {
-    event.preventDefault();
-    getCatalog(categoriesState.activeCategory, catalogState.catalogData.length);
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+    const category = categories.find((o) => o.selected);
+    dispatch(catalogRequest({
+      categoryId: category ? category.id : null,
+      q: searchString.trim(),
+    }));
+  };
+
+  const handleChange = (evt) => {
+    dispatch(changeGlobalSetting({ searchString: evt.target.value }));
   };
 
   return (
     <section className="catalog">
-      <h2 className="text-center">Каталог</h2>
-      {searchSupport && <SearchForm />}
-      {categoriesState.loadingStatus && <Preloader />}
-      {categoriesState.errorText && (
-        <MessageDialog
-          content={{ type: 'error', text: categoriesState.errorText }}
-          onClick={() => getCatalogAndCategories(categoriesState.activeCategory)}
-        />
+      { text && <h2 className="text-center">{text}</h2> }
+      {(showSearchField) && (
+        <form className="catalog-search-form form-inline" onSubmit={handleSubmit}>
+          <input className="form-control" placeholder="Поиск" value={searchString} onChange={handleChange} />
+        </form>
       )}
-      {(!categoriesState.errorText && !categoriesState.loadingStatus)
-        && <Categories onChange={onCategoryChange} />}
-      {(catalogState.catalogData.length !== 0)
-        ? <List data={catalogState.catalogData} />
-        : (!catalogState.errorText && !catalogState.loadingStatus)
-        && <p className="text-center text-muted">Поиск по вашему запросу не дал результатов</p>}
-      {!categoriesState.loadingStatus && catalogState.loadingStatus && <Preloader />}
-      {!categoriesState.errorText && catalogState.errorText && (
-        <MessageDialog
-          content={{ type: 'error', text: catalogState.errorText }}
-          onClick={(event) => loadData(event)}
-        />
-      )}
-      {(!catalogState.errorText && !catalogState.loadingStatus && catalogState.hasNextData) && (
+      <Categories onClick={handleClick} />
+      <CardList items={items} />
+      {(loading || error) && <Preloader />}
+      {((!loading && !error) && (items.length === 0)) && (<h2 className="text-center">Ничего не найдено! =(</h2>) }
+      {(!loading && !error) && (recievedCount === recieveOffset) && (
         <div className="text-center">
-          <button
-            type="button"
-            onClick={(event) => loadData(event)}
-            className="btn btn-outline-primary"
-            disabled={catalogState.loadingStatus}
-          >
-            Загрузить ещё
-          </button>
+          <button type="button" className="btn btn-outline-primary" onClick={handleLoadMore}>Загрузить ещё</button>
         </div>
       )}
     </section>
@@ -85,9 +78,11 @@ export default function Catalog(props) {
 }
 
 Catalog.defaultProps = {
-  searchSupport: true,
+  text: 'Каталог',
+  showSearchField: true,
 };
 
 Catalog.propTypes = {
-  searchSupport: PropTypes.bool,
+  text: PropTypes.string,
+  showSearchField: PropTypes.bool,
 };

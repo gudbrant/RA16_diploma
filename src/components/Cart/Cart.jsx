@@ -1,13 +1,10 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { cartDeletePosition } from '../../actions/cartAction';
+import { cartRemoveItem } from '../../redux/cart/actions';
 
 export default function Cart() {
-  const cartState = useSelector((state) => state.cartReducer);
+  const cart = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-
-  const onDeleteCartPosition = (id, size) => dispatch(cartDeletePosition(id, size));
 
   return (
     <section className="cart">
@@ -25,27 +22,19 @@ export default function Cart() {
           </tr>
         </thead>
         <tbody>
-          {cartState.cartData.map((value, index) => (
-            <tr key={`${value.id}${value.size}`}>
+          {cart.map((o, index) => (
+            <tr key={o.item.key}>
               <th scope="row">{index + 1}</th>
-              <td><Link to={`/catalog/${value.id}`}>{value.title}</Link></td>
-              <td>{value.size}</td>
-              <td>{value.count}</td>
-              <td>
-                {value.price}
-                {' '}
-                руб.
-              </td>
-              <td>
-                {value.price * value.count}
-                {' '}
-                руб.
-              </td>
+              <td><a href={`/products/${o.item.id}`}>{o.item.title}</a></td>
+              <td>{o.item.size}</td>
+              <td>{o.quantity}</td>
+              <td>{`${o.item.price} руб.`}</td>
+              <td>{`${o.item.price * o.quantity} руб.`}</td>
               <td>
                 <button
                   type="button"
                   className="btn btn-outline-danger btn-sm"
-                  onClick={() => onDeleteCartPosition(value.id, value.size)}
+                  onClick={() => dispatch(cartRemoveItem({ key: o.item.key }))}
                 >
                   Удалить
                 </button>
@@ -54,12 +43,7 @@ export default function Cart() {
           ))}
           <tr>
             <td colSpan="5" className="text-right">Общая стоимость</td>
-            <td>
-              {cartState.cartData.reduce((accumulator, { price, count }) => accumulator
-                + price * count, 0)}
-              {' '}
-              руб.
-            </td>
+            <td>{`${cart.length ? cart.reduce((acc, cur) => (acc + cur.item.price * cur.quantity), 0) : 0} руб.`}</td>
           </tr>
         </tbody>
       </table>

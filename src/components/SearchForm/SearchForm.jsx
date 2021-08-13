@@ -1,24 +1,53 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import { searchFieldChange, searchTextStatus } from '../../actions/searchAction';
+import { changeGlobalSetting } from '../../redux/globalSettings/actions';
 
-export default function SearchForm() {
-  const searchState = useSelector((state) => state.searchReducer);
+export default function SearchForm(props) {
+  const { className, dataId, onSubmit } = props;
+  const { searchString } = useSelector((state) => state.globalSettings);
   const dispatch = useDispatch();
 
-  const onInputChange = (event) => {
-    const { name, value } = event.target;
-    dispatch(searchFieldChange(name, value));
+  const inputEl = useRef();
+
+  const handleSubmit = (evt) => {
+    evt.preventDefault();
+    onSubmit(searchString.trim());
   };
 
-  const onSubmit = (event) => {
-    event.preventDefault();
-    dispatch(searchTextStatus(searchState.search, true));
+  const handleChange = (evt) => {
+    dispatch(changeGlobalSetting({ searchString: evt.target.value }));
   };
+
+  useEffect(() => {
+    if (!className.includes('invisible')) inputEl.current.focus();
+    return () => {};
+  }, [className]);
 
   return (
-    <form className="catalog-search-form form-inline" onSubmit={onSubmit}>
-      <input className="form-control" name="search" placeholder="Поиск" value={searchState.search} onChange={onInputChange} />
+    <form
+      className={className}
+      data-id={dataId}
+      onSubmit={handleSubmit}
+    >
+      <input
+        className="form-control"
+        placeholder="Поиск"
+        value={searchString}
+        onChange={handleChange}
+        ref={inputEl}
+      />
     </form>
   );
 }
+
+SearchForm.defaultProps = {
+  className: '',
+  dataId: '',
+};
+
+SearchForm.propTypes = {
+  className: PropTypes.string,
+  dataId: PropTypes.string,
+  onSubmit: PropTypes.func.isRequired,
+};

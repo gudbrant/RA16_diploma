@@ -1,41 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import noimagesplash from '../../img/no-image-icon-23487.png';
+import { Link } from 'react-router-dom';
+import Price from '../Price/Price';
+import Image from '../Image/Image';
 
-export default function Card(props) {
-  const { data } = props;
-
-  const onImageError = (event) => {
-    const e = event;
-    e.target.src = noimagesplash;
-  };
+export default function Card({ data }) {
+  const {
+    images,
+    title,
+    price,
+    id,
+  } = data;
 
   return (
-    <div className="col-4">
-      <div className="card">
-        <div className="card-img-wrapper">
-          <img
-            src={data.images[0]}
-            className="card-img-top img-fluid"
-            alt={data.title}
-            onError={onImageError}
-          />
-        </div>
-        <div className="card-body">
-          <p className="card-text">{data.title}</p>
-          <p className="card-text">
-            {data.price}
-            {' '}
-            руб.
-          </p>
-          <Link to={`/catalog/${data.id}`} className="btn btn-outline-primary">Заказать</Link>
-        </div>
+    <div className="card catalog-item-card">
+      <Image id={id} title={title} images={images} />
+      <div className="card-body">
+        <p className="card-text" style={{ minHeight: '3em' }}>{title}</p>
+        <p className="card-text">
+          <Price value={price} currency=" руб." />
+        </p>
+        <Link to={`/catalog/${id}`} className="btn btn-outline-primary">Заказать</Link>
       </div>
     </div>
   );
 }
 
 Card.propTypes = {
-  data: PropTypes.instanceOf(Object).isRequired,
+  data: PropTypes.shape({
+    category: PropTypes.number,
+    images: PropTypes.arrayOf(PropTypes.string).isRequired,
+    title: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    id: PropTypes.number.isRequired,
+  }).isRequired,
 };
