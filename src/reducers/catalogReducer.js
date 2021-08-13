@@ -1,91 +1,43 @@
-import {
-  FETCH_CATALOG_CATEGORIES_REQUEST,
-  FETCH_CATALOG_CATEGORIES_CHANGE,
-  FETCH_CATALOG_CATEGORIES_SUCCESS,
-  FETCH_CATALOG_ITEMS_REQUEST,
-  FETCH_CATALOG_ITEMS_SUCCESS,
-  FETCH_CATALOG_FAILURE,
-  SEARCH_CHANGE,
-  SEARCH_CLEAR,
-} from '../types/catalogTypes';
-
 const initialState = {
-  categories: [{ id: 0, title: 'Все' }],
-  activCategory: 0,
-  items: [],
-  responseItemsAmount: 0,
-  search: '',
-  loading: false,
-  loadingCategory: false,
-  error: null,
+  catalogData: [],
+  errorText: null,
+  loadingStatus: false,
+  hasNextData: false,
 };
 
 export default function catalogReducer(state = initialState, action) {
   switch (action.type) {
-    case FETCH_CATALOG_CATEGORIES_REQUEST:
+    case 'CATALOG_FIRSTPAGE_REQUEST':
       return {
-        ...state,
-        categories: [{ id: 0, title: 'Все' }],
-        activCategory: 0,
-        items: [],
-        responseItemsAmount: 0,
-        loading: true,
-        loadingCategory: true,
-        error: null,
+        ...state, catalogData: [], errorText: null, loadingStatus: true,
       };
-    case FETCH_CATALOG_CATEGORIES_CHANGE: {
-      const { categoryId } = action.payload;
+    case 'CATALOG_FIRSTPAGE_REQUEST_SUCCESS': {
+      const { catalogData } = action.payload;
       return {
         ...state,
-        items: [],
-        activCategory: categoryId,
+        catalogData,
+        errorText: null,
+        loadingStatus: false,
+        hasNextData: catalogData.length === 6,
       };
     }
-    case FETCH_CATALOG_CATEGORIES_SUCCESS: {
-      const { dataCategory } = action.payload;
+    case 'CATALOG_REQUEST_FAILURE': {
+      const { errorText } = action.payload;
+      return { ...state, errorText, loadingStatus: false };
+    }
+    case 'CATALOG_NEXTPAGE_REQUEST': {
+      return { ...state, errorText: null, loadingStatus: true };
+    }
+    case 'CATALOG_NEXTPAGE_REQUEST_SUCCESS': {
+      const { catalogData } = action.payload;
       return {
         ...state,
-        categories: [...state.categories, ...dataCategory],
+        catalogData: [...state.catalogData, ...catalogData],
+        errorText: null,
+        loadingStatus: false,
+        hasNextData: catalogData.length === 6,
       };
     }
-    case FETCH_CATALOG_ITEMS_REQUEST:
-      return {
-        ...state,
-        loading: true,
-        error: null,
-        responseItemsAmount: 0,
-      };
-    case FETCH_CATALOG_ITEMS_SUCCESS: {
-      const { dataItems } = action.payload;
-      return {
-        ...state,
-        items: [...state.items, ...dataItems],
-        responseItemsAmount: dataItems.length,
-        loading: false,
-        loadingCategory: false,
-        error: null,
-      };
-    }
-    case SEARCH_CHANGE: {
-      const { value } = action.payload;
-      return {
-        ...state,
-        items: [],
-        search: value,
-      };
-    }
-    case SEARCH_CLEAR:
-      return { ...state, search: '' };
-    case FETCH_CATALOG_FAILURE: {
-      const { error } = action.payload;
-      return {
-        ...state,
-        loading: false,
-        loadingCategory: false,
-        error,
-      };
-    }
-    default:
-      return { ...state };
+    default: return state;
   }
 }

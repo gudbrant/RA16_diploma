@@ -1,40 +1,39 @@
-import {
-  FETCH_PRODUCT_CLEAR,
-  FETCH_PRODUCT_REQUEST,
-  FETCH_PRODUCT_SUCCESS,
-  FETCH_PRODUCT_FAILURE,
-} from '../types/productTypes';
-
 const initialState = {
-  item: {},
-  loading: false,
-  error: null,
+  product: null,
+  errorText: null,
+  loadingStatus: false,
+  count: 1,
+  size: null,
+  repeatAction: true,
 };
 
 export default function productReducer(state = initialState, action) {
   switch (action.type) {
-    case FETCH_PRODUCT_CLEAR:
-      return { ...initialState };
-    case FETCH_PRODUCT_REQUEST:
-      return { ...state, loading: true, error: null };
-    case FETCH_PRODUCT_SUCCESS: {
-      const { item } = action.payload;
+    case 'PRODUCT_REQUEST': {
       return {
-        ...state,
-        item,
-        loading: false,
-        error: null,
+        ...state, errorText: null, loadingStatus: true, count: 1, size: null,
       };
     }
-    case FETCH_PRODUCT_FAILURE: {
-      const { error } = action.payload;
+    case 'PRODUCT_REQUEST_SUCCESS': {
+      const { product } = action.payload;
       return {
-        ...state,
-        loading: false,
-        error,
+        ...state, product, errorText: null, loadingStatus: false,
       };
     }
-    default:
-      return { ...state };
+    case 'PRODUCT_REQUEST_FAILURE': {
+      const { errorText, repeatAction } = action.payload;
+      return {
+        ...state, product: null, errorText, repeatAction, loadingStatus: false,
+      };
+    }
+    case 'PRODUCT_COUNT': {
+      const { count } = action.payload;
+      return { ...state, count };
+    }
+    case 'PRODUCT_SIZE': {
+      const { size } = action.payload;
+      return { ...state, size };
+    }
+    default: return state;
   }
 }

@@ -1,40 +1,28 @@
-import {
-  FETCH_TOP_SALES_REQUEST,
-  FETCH_TOP_SALES_SUCCESS,
-  FETCH_TOP_SALES_FAILURE,
-  FETCH_TOP_SALES_CLEAR,
-} from '../types/topSalesTypes';
-
 const initialState = {
-  items: [],
-  loading: false,
-  error: null,
+  topSalesData: [],
+  errorText: null,
+  loadingStatus: false,
 };
 
 export default function topSalesReducer(state = initialState, action) {
   switch (action.type) {
-    case FETCH_TOP_SALES_CLEAR:
-      return { ...initialState };
-    case FETCH_TOP_SALES_REQUEST:
-      return { ...state, loading: true, error: null };
-    case FETCH_TOP_SALES_SUCCESS: {
-      const { data } = action.payload;
+    case 'TOPSALES_REQUEST': {
       return {
-        ...state,
-        items: data,
-        loading: false,
-        error: null,
+        ...state, topSalesData: [], errorText: null, loadingStatus: true,
       };
     }
-    case FETCH_TOP_SALES_FAILURE: {
-      const { error } = action.payload;
+    case 'TOPSALES_REQUEST_SUCCESS': {
+      const { topSalesData } = action.payload;
       return {
-        items: [],
-        loading: false,
-        error,
+        ...state, topSalesData, errorText: null, loadingStatus: false,
       };
     }
-    default:
-      return { ...state };
+    case 'TOPSALES_REQUEST_FAILURE': {
+      const { errorText } = action.payload;
+      return {
+        ...state, topSalesData: [], errorText, loadingStatus: false,
+      };
+    }
+    default: return state;
   }
 }

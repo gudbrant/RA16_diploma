@@ -1,41 +1,31 @@
-import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
-import { combineEpics, createEpicMiddleware } from 'redux-observable';
-import { topSalesEpics } from '../epics/topSalesEpics';
-import { fetchCatalogCategoriesEpics, fetchCatalogItemsEpics, fetchCatalogCategoriesChangeEpics, searchChangeEpics} from '../epics/catalogEpics';
-import { productEpics } from '../epics/productEpics';
-import { sendOrderEpics } from '../epics/sendOrderEpics';
+/* eslint-disable no-underscore-dangle */
+import {
+  createStore,
+  combineReducers,
+  applyMiddleware,
+  compose,
+} from 'redux';
+import thunk from 'redux-thunk';
 import topSalesReducer from '../reducers/topSalesReducer';
+import categoriesReducer from '../reducers/categoriesReducer';
 import catalogReducer from '../reducers/catalogReducer';
 import productReducer from '../reducers/productReducer';
-import basketProductReducer from '../reducers/basketProductReducer';
-import sendOrderReducer from '../reducers/sendOrderReducer';
+import searchReducer from '../reducers/searchReducer';
+import cartReducer from '../reducers/cartReducer';
+import orderReducer from '../reducers/orderReducer';
 
 const reducer = combineReducers({
-  topSalesList: topSalesReducer,
-  catalogList: catalogReducer,
-  productItem: productReducer,
-  basket: basketProductReducer,
-  sendOrder: sendOrderReducer,
+  topSalesReducer,
+  categoriesReducer,
+  catalogReducer,
+  productReducer,
+  searchReducer,
+  cartReducer,
+  orderReducer,
 });
 
-const epic = combineEpics(
-  topSalesEpics,
-  fetchCatalogCategoriesEpics,
-  fetchCatalogItemsEpics,
-  fetchCatalogCategoriesChangeEpics,
-  searchChangeEpics,
-  productEpics,
-  sendOrderEpics,
-);
-
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const epicMiddleware = createEpicMiddleware();
 
-const store = createStore(
-  reducer,
-  composeEnhancers(applyMiddleware(epicMiddleware))
-);
-
-epicMiddleware.run(epic);
+const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
 
 export default store;
