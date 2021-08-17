@@ -1,5 +1,4 @@
-﻿[![Build status](https://ci.appveyor.com/api/projects/status/trn655m80djxwkvb?svg=true)](https://ci.appveyor.com/project/shayu78/ra16-diploma)
-# Дипломный проект курса «React»
+﻿# Дипломный проект курса «React»
 
 Дипломный проект представляет собой интернет-магазин обуви. Задача заключается в создании работающего приложения, всеми основными функциями которого можно пользоваться.
 
