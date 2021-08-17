@@ -2,7 +2,7 @@
   "name": "ra16-diploma",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "http://.",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -56,5 +56,16 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "moment": "^2.29.1",
     "nanoid": "^3.1.20"
+  },
+  "description": "Дипломный проект курса «React»",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gudbrant/RA16_diploma.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gudbrant/RA16_diploma/issues"
   }
 }
